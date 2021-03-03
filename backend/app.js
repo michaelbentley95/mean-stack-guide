@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require('express');
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -16,6 +17,7 @@ mongoose.connect("mongodb+srv://testuser:<PASSWORD>@cluster0.opxck.mongodb.net/n
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use("/images", express.static(path.join("backend/images"))); //Allows read access to this address. Maps "backend/images" to be just "/images"
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');

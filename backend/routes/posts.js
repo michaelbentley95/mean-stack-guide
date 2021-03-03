@@ -28,20 +28,33 @@ const storage = multer.diskStorage({
 });
 
 router.post('', multer({storage: storage}).single("image"), (req, res, next) => {
+  const url = req.protocol + '://' + req.get("host");
   const post = new Post({
     title: req.body.title,
     content: req.body.content,
+    imagePath: url + "/images/" + req.file.filename
   });
   post.save().then(createdPost =>{
-    res.status(201).json({message: "post added", data: createdPost._id});
+    res.status(201).json({message: "post added", data: {
+      id: createdPost._id,
+      title: createdPost.title,
+      content: createdPost.content,
+      imagePath: createdPost.imagePath
+    }});
   });
 });
 
-router.put('/:id', (req, res, next) => {
+router.put('/:id', multer({storage: storage}).single("image"), (req, res, next) => {
+  let imagePath = req.body.image; //Make it what we already had by default
+  if(req.file){
+    const url = req.protocol + '://' + req.get("host");
+    imagePath = url + "/images/" + req.file.filename;
+  }
   const post = new Post({
     _id: req.body.id,
     title: req.body.title,
     content: req.body.content,
+    imagePath: imagePath
   });
   Post.updateOne({_id: req.params.id}, post).then(result =>{
     res.status(200).json({message: "Post updated!"});
