@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, NgForm, Validators } from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { AuthService } from 'src/app/auth/auth.service';
 import { Post } from '../post.model';
 
 import { PostsService } from '../posts.service';
@@ -11,7 +13,7 @@ import { mimeType } from './mime-tyle.validator';
   templateUrl: './post-create.component.html',
   styleUrls: ['./post-create.component.css'],
 })
-export class PostCreateComponent implements OnInit {
+export class PostCreateComponent implements OnInit, OnDestroy {
   enteredTitle = '';
   enteredContent = '';
   post: Post;
@@ -20,10 +22,12 @@ export class PostCreateComponent implements OnInit {
   imagePreview: string;
   private mode = 'create';
   private postId: string;
+  private authListenerSubscription: Subscription;
 
   constructor(
     public postsService: PostsService,
-    public route: ActivatedRoute
+    public route: ActivatedRoute,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -37,6 +41,12 @@ export class PostCreateComponent implements OnInit {
         asyncValidators: [mimeType],
       }),
     });
+
+    this.authListenerSubscription = this.authService
+      .getAuthStatusListener()
+      .subscribe((authStatus) => {
+        this.isLoading = false;
+      });
 
     this.route.paramMap.subscribe((paramMap: ParamMap) => {
       if (paramMap.has('postId')) {
@@ -97,5 +107,9 @@ export class PostCreateComponent implements OnInit {
     }
 
     this.form.reset();
+  }
+
+  ngOnDestroy(): void {
+    this.authListenerSubscription.unsubscribe();
   }
 }

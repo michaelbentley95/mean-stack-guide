@@ -23,7 +23,7 @@ router.post("/signup", (req, res, next) => {
       })
       .catch((err) => {
         res.status(500).json({
-          message: err,
+          message: "Invalid authorization credentials!",
         });
       });
   });
@@ -59,7 +59,7 @@ router.post("/login", (req, res, next) => {
     })
     .catch((err) => {
       return res.status(401).json({
-        message: "Auth failed",
+        message: "Invalid authorization credentials!",
       });
     });
 });
